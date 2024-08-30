@@ -1,12 +1,29 @@
 import React, { useState,useEffect } from 'react';
 import './ProductList.css'
 import CartItem from './CartItem';
-import { addItem } from './CartSlice';
-
+import { addItem, removeItem, updateQuantity, CartSlice } from './CartSlice';
+import { createListenerMiddleware } from '@reduxjs/toolkit';
+import { useDispatch, useSelector } from 'react-redux';
 function ProductList() {
-    const [showCart, setShowCart] = useState(false); 
+    const cart = useSelector(state => state.cart.items);//le agregué está línea que existe en CartItem.jsx pero creo que se podría hacer sin esta línea de código
+    const [showCart, setShowCart] = useState(false);
     const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
+
     const [addedToCart, setAddedToCart] = useState({});
+
+    const dispatch = useDispatch();
+
+    function handleAddToCart(plant){
+        dispatch( addItem(plant) );
+
+        setAddedToCart( (prev_plant) => ({
+            ...prev_plant, [plant.name]: true,
+        })); //// Set the product name as key and value as true to indicate it's added to cart
+        
+
+        //The handleAddToCart() function will carry the details of that plant which user want to add in the cart. 
+        //And the plant details to the cart at a global level using CartSlice.jsx.
+    }
 
     const plantsArray = [
         {
@@ -235,6 +252,11 @@ function ProductList() {
     fontSize: '30px',
     textDecoration: 'none',
    }
+    const styleTextCart={
+    position: 'absolute',
+    padding: '14px 25px',
+    fontSize: '32px',
+    }
    const handleCartClick = (e) => {
     e.preventDefault();
     setShowCart(true); // Set showCart to true when cart icon is clicked
@@ -245,17 +267,17 @@ const handlePlantsClick = (e) => {
     setShowCart(false); // Hide the cart when navigating to About Us
 };
 
-   const handleContinueShopping = (e) => {
+const handleContinueShopping = (e) => {
     e.preventDefault();
     setShowCart(false);
-  };
-  const handleAddToCart = (product) => {
-    dispatch(addItem(product));
-    setAddedToCart((prevState) => ({
-       ...prevState,
-       [product.name]: true, // Set the product name as key and value as true to indicate it's added to cart
-     }));
-  };
+};
+const counterCart = () => {//función anexada al proyecto otiginal para mostrar el total en el carrito
+    let total_plants = 0;
+    cart.map(item => (
+        total_plants = total_plants + item.quantity
+    ));
+    return total_plants;
+};
     return (
         <div>
              <div className="navbar" style={styleObj}>
@@ -273,25 +295,43 @@ const handlePlantsClick = (e) => {
             </div>
             <div style={styleObjUl}>
                 <div> <a href="#" onClick={(e)=>handlePlantsClick(e)} style={styleA}>Plants</a></div>
-                <div> <a href="#" onClick={(e) => handleCartClick(e)} style={styleA}><h1 className='cart'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" id="IconChangeColor" height="68" width="68"><rect width="156" height="156" fill="none"></rect><circle cx="80" cy="216" r="12"></circle><circle cx="184" cy="216" r="12"></circle><path d="M42.3,72H221.7l-26.4,92.4A15.9,15.9,0,0,1,179.9,176H84.1a15.9,15.9,0,0,1-15.4-11.6L32.5,37.8A8,8,0,0,0,24.8,32H8" fill="none" stroke="#faf9f9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" id="mainIconPathAttribute"></path></svg></h1></a></div>
+                <div> 
+                    <a href="#" onClick={(e) => handleCartClick(e)} style={styleA}>
+                        <h1 className='cart'>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" id="IconChangeColor" height="68" width="68">
+                                <rect width="156" height="156" fill="none"></rect><circle cx="80" cy="216" r="12"></circle><circle cx="184" cy="216" r="12"></circle><path d="M42.3,72H221.7l-26.4,92.4A15.9,15.9,0,0,1,179.9,176H84.1a15.9,15.9,0,0,1-15.4-11.6L32.5,37.8A8,8,0,0,0,24.8,32H8" fill='none' stroke="#faf9f9" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" id="mainIconPathAttribute" ></path>
+                            </svg>
+                            <div className='cart-text' style={styleTextCart}>
+                                {counterCart()}
+                            </div>
+                        </h1>
+                    </a>
+                </div>
             </div>
         </div>
         {!showCart? (
         <div className="product-grid">
-                {plantsArray.map((category, index) => (
-    <div key={index}>
-        <h1><div>{category.category}</div></h1>
-        <div className="product-list">
-            {category.plants.map((plant, plantIndex) => (
-            <div className="product-card" key={plantIndex}>
-                <img className="product-image" src={plant.image} alt={plant.name} />
-                <div className="product-title">{plant.name}</div>
-                <button  className="product-button" onClick={() => handleAddToCart(plant)}>Add to Cart</button>
-            </div>
-            ))}
-        </div>
-    </div>
-    ))}
+            {
+                plantsArray.map((item, index_category) => (
+                    <div key={index_category}>
+                        <div><h1 style={{textAlign:'center'}}>{item.category}</h1></div>
+                        <div className='product-list'>
+                            {
+                                item.plants.map((plant, index_plant) => (
+                                    <div key={index_plant} className='product-card'>
+                                        <p className='product-title'> {plant.name} </p>
+                                        <img src={plant.image} className='product-image'/>
+                                        <p className='product-description'> {plant.description} </p>
+                                        <p className='product-cost'> {plant.cost} </p>
+
+                                        <button type='button' className='product-button' onClick={() => handleAddToCart(plant)}>Add to Cart</button>
+                                    </div>
+                                ))
+                            }
+                        </div>
+                    </div>
+                ))
+            }
 
         </div>
  ) :  (
