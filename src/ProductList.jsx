@@ -4,10 +4,12 @@ import CartItem from './CartItem';
 import { addItem, removeItem, updateQuantity, CartSlice } from './CartSlice';
 import { createListenerMiddleware } from '@reduxjs/toolkit';
 import { useDispatch, useSelector } from 'react-redux';
+
+
 function ProductList() {
-    const cart = useSelector(state => state.cart.items);//le agregué está línea que existe en CartItem.jsx pero creo que se podría hacer sin esta línea de código
+    const cart = useSelector(state => state.cart.items);
     const [showCart, setShowCart] = useState(false);
-    const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
+    const [showPlants, setShowPlants] = useState(false); 
 
     const [addedToCart, setAddedToCart] = useState({});
 
@@ -18,11 +20,7 @@ function ProductList() {
 
         setAddedToCart( (prev_plant) => ({
             ...prev_plant, [plant.name]: true,
-        })); //// Set the product name as key and value as true to indicate it's added to cart
-        
-
-        //The handleAddToCart() function will carry the details of that plant which user want to add in the cart. 
-        //And the plant details to the cart at a global level using CartSlice.jsx.
+        })); 
     }
 
     const plantsArray = [
@@ -259,19 +257,19 @@ function ProductList() {
     }
    const handleCartClick = (e) => {
     e.preventDefault();
-    setShowCart(true); // Set showCart to true when cart icon is clicked
+    setShowCart(true);
 };
 const handlePlantsClick = (e) => {
     e.preventDefault();
-    setShowPlants(true); // Set showAboutUs to true when "About Us" link is clicked
-    setShowCart(false); // Hide the cart when navigating to About Us
+    setShowPlants(true);
+    setShowCart(false); 
 };
 
 const handleContinueShopping = (e) => {
     e.preventDefault();
     setShowCart(false);
 };
-const counterCart = () => {//función anexada al proyecto otiginal para mostrar el total en el carrito
+const counterCart = () => {
     let total_plants = 0;
     cart.map(item => (
         total_plants = total_plants + item.quantity
